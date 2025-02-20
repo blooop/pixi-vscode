@@ -7,6 +7,7 @@ import { Pixi } from "./environmentManagers/pixi";
 import { PixiExtensionService } from "./extensionServices/pixi-extensionservice";
 import { PypiService } from "./pypi/pypi-service";
 import { PypiClient } from "./pypi/pypi-client";
+import { PixiTaskProvider } from './taskProvider';
 const Cache = require("vscode-cache");
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -86,6 +87,15 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 		)
 	);
+
+	// Register task provider
+	const workspaceRoot = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+	if (workspaceRoot) {
+		const pixiTaskProvider = new PixiTaskProvider(workspaceRoot);
+		context.subscriptions.push(
+			vscode.tasks.registerTaskProvider(PixiTaskProvider.TaskType, pixiTaskProvider)
+		);
+	}
 }
 
 // This method is called when your extension is deactivated
