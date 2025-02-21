@@ -293,6 +293,47 @@ export class PixiExtensionService {
 		this.vse.openTerminalAndRunCommand(cmd, `Pixi: ${env.name}`, true);
 	}
 
+	async runTask(uri: vscode.Uri) {
+		const pixi_project_dir =
+			uri || (await this.vse.chooseWorkspaceFolder())!.uri;
+
+		const manifestPath = await this.findManifestFile(pixi_project_dir.fsPath);
+
+		// for each package, the arg is "--pypi <package-name>"
+		const args = await this.pixi_service.addPyPiPackages();
+		if (!args) {
+			console.log("No packages found");
+			return;
+		}
+
+		const features = await this.pixi_service.getEnvironmentFeatures(
+			manifestPath
+		);
+		if (!features) {
+			console.log("No features found");
+		}
+
+		const chosenFeatures = await this.pixi_service.showQuickPick({
+			title: "Feature to add packages to",
+			items: features!.map((feature) => ({
+				label: feature,
+				description: "",
+			})),
+			placeholder: "Select a feature",
+			canSelectMany: false,
+			selectedItems: [{ label: "default", description: "" }],
+		});
+		const feature = chosenFeatures ? chosenFeatures[0] : "default";
+		if (feature !== "default") {
+			args.push(`--feature ${feature}`);
+		}
+
+		args.push(`--manifest-path ${manifestPath}`);
+
+		console.log("pixi " + args.join(" "));
+		this.vse.runPixiCommand(args);
+	}
+
 	/**
 	 * Get the Pixi project directory
 	 *

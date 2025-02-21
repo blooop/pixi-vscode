@@ -56,6 +56,10 @@
       {
         "command": "pixi-vscode.activateEnvironmentTerminal",
         "title": "Pixi: Activate Environment in new Terminal"
+      },
+      {
+        "command": "pixi-vscode.runTask",
+        "title": "Pixi: Run Task"
       }
     ],
     "menus": {
